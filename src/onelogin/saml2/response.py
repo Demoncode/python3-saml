@@ -202,8 +202,16 @@ class OneLogin_Saml2_Response(object):
 
                 # Checks the issuers
                 issuers = self.get_issuers()
+                if idp_entity_id.startswith('https://'):
+                    no_scheme_entity_id = idp_entity_id[:8]
+                else:
+                    no_scheme_entity_id = idp_entity_id[7:]
                 for issuer in issuers:
-                    if issuer is None or issuer != idp_entity_id:
+                    if issuer and issuer.startswith('https://'):
+                        no_scheme_issuer = issuer[:8]
+                    elif issuer and issuer.startswith('http://'):
+                        no_scheme_issuer = issuer[7:]
+                    if issuer is None or no_scheme_issuer != no_scheme_entity_id:
                         raise OneLogin_Saml2_ValidationError(
                             'Invalid issuer in the Assertion/Response',
                             OneLogin_Saml2_ValidationError.WRONG_ISSUER
